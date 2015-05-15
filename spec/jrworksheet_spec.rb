@@ -15,6 +15,14 @@ module JrGoogleData
       it 'has an inspect method' do
         expect(instance).to respond_to(:inspect)
       end
+
+      it 'has an new_list_query method' do
+        expect(instance).to respond_to(:new_list_query)
+      end
+
+      it 'has an get_rows method' do
+        expect(instance).to respond_to(:get_rows)
+      end
     end
 
     context 'an instance' do
@@ -24,7 +32,19 @@ module JrGoogleData
 
       it 'for a found instance, the inspect method shows url contents' do
         regex = %r{.+Worksheet:.+/feeds/cells.+/feeds/list.+>}
-        expect(instance.inspect).to match regex
+        actual = instance.inspect
+        puts actual
+        expect(actual).to match regex
+      end
+
+      it 'a found instance, returns a ListQuery object' do
+        expect(instance.new_list_query).to be_a(ListQuery)
+      end
+
+      it 'given a loaded ListQuery object, it gets some rows' do
+        qry = instance.new_list_query.add_start_index(1).add_max_results(2)
+        results = instance.get_rows(qry)
+        expect(results.size).to eq(2)
       end
     end
   end

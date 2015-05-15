@@ -39,6 +39,11 @@ public class JrListQuery extends RubyObject {
         _query = new ListQuery(feed);
     }
 
+    public JrListQuery(final Ruby runtime, RubyClass rubyClass, URL feed) {
+        super(runtime, rubyClass);
+        _query = new ListQuery(feed);
+    }
+
     @JRubyMethod(name = "new", meta = true)
     public static JrListQuery newInstance(IRubyObject self) {
         JrListQuery lq = (JrListQuery)((RubyClass) self).allocate();
@@ -60,7 +65,7 @@ public class JrListQuery extends RubyObject {
         return this;
     }
 
-    @JRubyMethod(required = 1)
+    @JRubyMethod(required = 2)
     public JrListQuery add_key_value(ThreadContext context, IRubyObject key, IRubyObject val) {
         String k = key.toString();
         String v = val.toString();

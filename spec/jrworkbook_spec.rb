@@ -33,7 +33,7 @@ module JrGoogleData
 
       it 'using a title, it raises an error when a worksheet is not found' do
         expect{instance.worksheet_by_title('Maain')}.to raise_error(
-            JrGoogleData::RetrievalError, /Unable to find a worksheet with title: Maain/
+            JrGoogleData::ReadError, /Unable to find a worksheet with title: Maain/
           )
       end
 

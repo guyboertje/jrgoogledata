@@ -22,8 +22,12 @@ describe JrGoogleData do
       expect(defined?(JrGoogleData::CredentialError)).to eq("constant")
     end
 
-    it 'contains the RetrievalError class' do
-      expect(defined?(JrGoogleData::RetrievalError)).to eq("constant")
+    it 'contains the ReadError class' do
+      expect(defined?(JrGoogleData::ReadError)).to eq("constant")
+    end
+
+    it 'contains the WriteError class' do
+      expect(defined?(JrGoogleData::WriteError)).to eq("constant")
     end
   end
 end

@@ -11,11 +11,11 @@ import org.jruby.exceptions.RaiseException;
  * @author guy
  */
 
-@JRubyClass(name = "JrGoogleData::RetrievalError", parent = "RuntimeError")
+@JRubyClass(name = "JrGoogleData::ReadError", parent = "RuntimeError")
 public class JrReadError {
 
     public static RaiseException newError(Ruby ruby, String message) {
-        RubyClass errorClass = ruby.getModule("JrGoogleData").getClass("RetrievalError");
+        RubyClass errorClass = ruby.getModule("JrGoogleData").getClass("ReadError");
         return new RaiseException(RubyException.newException(ruby, errorClass, message), true);
     }
 }

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.jrgoogledata;
 
 
@@ -13,8 +8,6 @@ import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.util.ServiceException;
 import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
 import org.jruby.Ruby;
 import org.jruby.RubyArray;
 import org.jruby.RubyClass;
@@ -77,29 +70,43 @@ public class JrWorksheet extends RubyObject {
         return getRuntime().newString(str.toString());
     }
 
-    @JRubyMethod
-    public JrListQuery new_list_query(ThreadContext context) {
+    @JRubyMethod(name = "new_list_query")
+    public IRubyObject newListQuery(ThreadContext context) {
         return new JrListQuery(
                 context.runtime,
                 _entry.getListFeedUrl()
         );
     }
+    
+    @JRubyMethod
+    public IRubyObject insert_row(ThreadContext context, IRubyObject row) {
+        String errorMessage = "Unknown error occured while inserting new Row";
+        try {
+            JrRow jr = (JrRow) row;
+            ListEntry entry = jr.getRow();
+            getService().insert(_entry.getListFeedUrl(), entry);
+            return context.nil;
+        } catch (Exception e) {
+            errorMessage = e.getMessage();
+        }
+        throw JrWriteError.newError(context.runtime, errorMessage);
+    }
 
     @JRubyMethod(required = 1)
-    public RubyArray get_rows(ThreadContext context, JrListQuery query) {
+    public RubyArray get_rows(ThreadContext context, IRubyObject query) {
+
         Ruby ruby = context.runtime;
         String errorMessage = "Unknown error occured while getting Rows";
         RubyArray array = ruby.newArray();
-        ListQuery q = query.getQuery();
-
         try {
+            ListQuery q = ((JrListQuery)query).getQuery();
             ListFeed feed  = getService().getFeed(q.getUrl(), ListFeed.class);
             for (ListEntry row: feed.getEntries ()) {
               array.append(new JrRow(ruby, row));
             }
             return array;
         }
-        catch (IOException | ServiceException e) {
+        catch (Exception e) {
             errorMessage = e.getMessage();
         }
         throw JrReadError.newError(ruby, errorMessage);

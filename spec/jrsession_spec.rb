@@ -68,7 +68,7 @@ module JrGoogleData
 
       it 'using an id, it raises an error when a wookbook is not found' do
         expect{session.workbook_by_id('16QOG3WKn_WPUt1EYLE5_VkTPU82yDvpMqrc7jr40jjs')}.to raise_error(
-            JrGoogleData::RetrievalError, /ServiceException: Internal Server Error/
+            JrGoogleData::ReadError, /ServiceException: Internal Server Error/
           )
       end
 
@@ -79,7 +79,7 @@ module JrGoogleData
 
       it 'using a title, it raises an error when a wookbook is not found' do
         expect{session.workbook_by_title('Test-colors')}.to raise_error(
-            JrGoogleData::RetrievalError, /File not found with title/
+            JrGoogleData::ReadError, /File not found with title/
           )
       end
 

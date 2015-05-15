@@ -17,6 +17,20 @@ public class JrgoogledataService implements BasicLibraryService {
     public boolean basicLoad(final Ruby runtime) throws IOException {
 
         RubyModule jrgd = runtime.defineModule("JrGoogleData");
+        RubyClass runtimeError = runtime.getRuntimeError();
+
+        jrgd.defineClassUnder("CredentialError", runtimeError, runtimeError.getAllocator());
+
+        jrgd.defineClassUnder("ReadError", runtimeError, runtimeError.getAllocator());
+
+        jrgd.defineClassUnder("WriteError", runtimeError, runtimeError.getAllocator());
+
+
+        RubyClass gdListQuery = jrgd.defineClassUnder("ListQuery", runtime.getObject(), JrListQuery.JRLISTQUERY_ALLOCATOR);
+        gdListQuery.defineAnnotatedMethods(JrListQuery.class);
+
+        RubyClass gdRow = jrgd.defineClassUnder("Row", runtime.getObject(), JrRow.JRROW_ALLOCATOR);
+        gdRow.defineAnnotatedMethods(JrRow.class);
 
         RubyClass gdSession = jrgd.defineClassUnder("Session", runtime.getObject(), JrSession.GDSESSION_ALLOCATOR);
         gdSession.defineAnnotatedMethods(JrSession.class);
@@ -26,16 +40,6 @@ public class JrgoogledataService implements BasicLibraryService {
 
         RubyClass gdWorksheet = jrgd.defineClassUnder("Worksheet", runtime.getObject(), JrWorksheet.JRWORKSHEET_ALLOCATOR);
         gdWorksheet.defineAnnotatedMethods(JrWorksheet.class);
-
-        RubyClass gdListQuery = jrgd.defineClassUnder("ListQuery", runtime.getObject(), JrListQuery.JRLISTQUERY_ALLOCATOR);
-        gdListQuery.defineAnnotatedMethods(JrListQuery.class);
-
-        RubyClass runtimeError = runtime.getRuntimeError();
-        jrgd.defineClassUnder("CredentialError", runtimeError, runtimeError.getAllocator());
-
-        jrgd.defineClassUnder("ReadError", runtimeError, runtimeError.getAllocator());
-
-        jrgd.defineClassUnder("WriteError", runtimeError, runtimeError.getAllocator());
 
         return true;
     }
