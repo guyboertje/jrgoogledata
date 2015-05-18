@@ -2,8 +2,8 @@ require 'spec_helper'
 
 module JrGoogleData
   describe Worksheet do
-    let(:session) { a_session() }
-    let(:instance) { a_workbook(session).worksheet_by_title('Main') }
+
+    setup_worksheet_instance()
 
     context 'its public api' do
       let(:instance) { described_class.new }
@@ -16,12 +16,28 @@ module JrGoogleData
         expect(instance).to respond_to(:inspect)
       end
 
-      it 'has an new_list_query method' do
+      it 'has a new_list_query method' do
         expect(instance).to respond_to(:new_list_query)
       end
 
-      it 'has an get_rows method' do
-        expect(instance).to respond_to(:get_rows)
+      it 'has a fetch_rows method' do
+        expect(instance).to respond_to(:fetch_rows)
+      end
+
+      it 'has an add_row method' do
+        expect(instance).to respond_to(:add_row)
+      end
+
+      it 'has an add_rows method' do
+        expect(instance).to respond_to(:add_rows)
+      end
+
+      it 'has an new_row method' do
+        expect(instance).to respond_to(:new_row)
+      end
+
+      it 'has an new_rows method' do
+        expect(instance).to respond_to(:new_rows)
       end
     end
 
@@ -31,20 +47,31 @@ module JrGoogleData
       end
 
       it 'for a found instance, the inspect method shows url contents' do
-        regex = %r{.+Worksheet:.+/feeds/cells.+/feeds/list.+>}
-        actual = instance.inspect
-        puts actual
+        regex = %r{.+Worksheet:.+/feeds/cells.+/feeds/list.+, columns\: \["id", "name", "age", "colour", "size"\] >}
+        actual = Instances.worksheet.inspect
         expect(actual).to match regex
       end
 
       it 'a found instance, returns a ListQuery object' do
-        expect(instance.new_list_query).to be_a(ListQuery)
+        expect(Instances.worksheet.new_list_query).to be_a(ListQuery)
       end
 
       it 'given a loaded ListQuery object, it gets some rows' do
-        qry = instance.new_list_query.add_start_index(1).add_max_results(2)
-        results = instance.get_rows(qry)
+        qry = Instances.worksheet.new_list_query.with_start_index(1).with_max_results(2)
+        results = Instances.worksheet.fetch_rows(qry)
         expect(results.size).to eq(2)
+      end
+
+      it 'given a new row, adds it to the end of the sheet' do
+        qry = Instances.worksheet.new_list_query.with_start_index(1).with_max_results(500)
+        last_row = Instances.worksheet.fetch_rows(qry).last.to_hash
+        next_id = last_row.fetch('id', 1).to_i.next
+        row = Instances.worksheet.new_row
+        expected = {'id' => next_id.to_s, 'name' => 'Bazz', 'age' => '42', 'colour' => 'pink', 'size' => 'S'}
+        row.merge(expected)
+        Instances.worksheet.add_row(row)
+        qry = Instances.worksheet.new_list_query.with_start_index(next_id).with_max_results(1)
+        expect(Instances.worksheet.fetch_rows(qry).last.to_hash).to eq(expected)
       end
     end
   end

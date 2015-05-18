@@ -8,7 +8,6 @@ import java.util.List;
 import org.jruby.Ruby;
 import org.jruby.RubyClass;
 import org.jruby.RubyObject;
-import org.jruby.RubyString;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.runtime.Block;
@@ -59,17 +58,14 @@ public class JrWorkbook extends RubyObject {
         String _title = title.toString();
         String errorMessage = "Unable to find a worksheet with title: " + _title;
         try {
-            for (WorksheetEntry wse : getWorksheets()) {
-                String wsTitle = wse.getTitle().getPlainText();
+            for (WorksheetEntry entry : getWorksheets()) {
+                String wsTitle = entry.getTitle().getPlainText();
                 if (wsTitle.equals(_title)) {
-                    return new JrWorksheet(
-                        ruby,
-                        wse
-                    );
+                    return new JrWorksheet(ruby, entry);
                 }
             }
         }
-        catch (IOException | ServiceException e) {
+        catch (Exception e) {
             errorMessage = e.getLocalizedMessage();
         }
         throw JrReadError.newError(ruby, errorMessage);

@@ -1,9 +1,9 @@
 package com.jrgoogledata;
 
-import com.google.gdata.client.Query.CustomParameter;
 import com.google.gdata.client.spreadsheet.ListQuery;
 import java.net.URL;
 import org.jruby.Ruby;
+import org.jruby.RubyArray;
 import org.jruby.RubyClass;
 import org.jruby.RubyNumeric;
 import org.jruby.RubyObject;
@@ -21,6 +21,8 @@ import org.jruby.runtime.builtin.IRubyObject;
 @JRubyClass(name = "JrGoogleData::ListQuery", parent = "Object")
 public class JrListQuery extends RubyObject {
     ListQuery _query;
+    RubyArray _columnNames;
+
 
     public static final ObjectAllocator JRLISTQUERY_ALLOCATOR = new ObjectAllocator() {
         @Override
@@ -51,26 +53,34 @@ public class JrListQuery extends RubyObject {
         return lq;
     }
 
+    public JrListQuery withColumnNames(ThreadContext context, IRubyObject names) {
+        _columnNames = (RubyArray)names;
+        return this;
+    }
+
     @JRubyMethod(required = 1)
-    public JrListQuery add_start_index(ThreadContext context, IRubyObject n) {
+    public JrListQuery with_start_index(ThreadContext context, IRubyObject n) {
         int i = RubyNumeric.num2int(n);
         _query.setStartIndex(i);
         return this;
     }
 
     @JRubyMethod(required = 1)
-    public JrListQuery add_max_results(ThreadContext context, IRubyObject n) {
+    public JrListQuery with_max_results(ThreadContext context, IRubyObject n) {
         int i = RubyNumeric.num2int(n);
         _query.setMaxResults(i);
         return this;
     }
 
-    @JRubyMethod(required = 2)
-    public JrListQuery add_key_value(ThreadContext context, IRubyObject key, IRubyObject val) {
-        String k = key.toString();
-        String v = val.toString();
-        CustomParameter cp = new CustomParameter(k,v);
-        _query.addCustomParameter(cp);
+    @JRubyMethod(required = 1)
+    public JrListQuery with_spreadsheet_query(ThreadContext context, IRubyObject ssq) {
+        _query.setSpreadsheetQuery(ssq.toString());
+        return this;
+    }
+
+    @JRubyMethod(required = 1)
+    public JrListQuery with_full_text_query(ThreadContext context, IRubyObject ftq) {
+        _query.setFullTextQuery(ftq.toString());
         return this;
     }
 

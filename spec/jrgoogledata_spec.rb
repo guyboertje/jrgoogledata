@@ -18,6 +18,14 @@ describe JrGoogleData do
       expect(defined?(JrGoogleData::Worksheet)).to eq("constant")
     end
 
+    it 'contains the ListQuery class' do
+      expect(defined?(JrGoogleData::ListQuery)).to eq("constant")
+    end
+
+    it 'contains the Row class' do
+      expect(defined?(JrGoogleData::Row)).to eq("constant")
+    end
+
     it 'contains the CredentialError class' do
       expect(defined?(JrGoogleData::CredentialError)).to eq("constant")
     end

@@ -280,12 +280,8 @@ public class JrSession extends RubyObject {
                 PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
                 return privateKey;
             }
-        } catch (NoSuchAlgorithmException exception) {
-            unexpectedException = exception;
-        } catch (InvalidKeySpecException exception) {
-            unexpectedException = exception;
-        } catch (IOException exception) {
-            unexpectedException = exception;
+        } catch (Exception e) {
+            unexpectedException = e;
         }
         throw JrCredentialError.newError(runtime, "Unexpected exception reading PKCS data: " + unexpectedException.getLocalizedMessage());
     }

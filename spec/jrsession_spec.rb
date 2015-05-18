@@ -56,35 +56,36 @@ module JrGoogleData
     end
 
     context 'an instance' do
-      let(:session) { described_class.new(Creds) }
+      
+      setup_session_instance()
 
       it 'has public workbook_by_id method' do
-        expect(session).to respond_to(:workbook_by_id)
+        expect(Instances.session).to respond_to(:workbook_by_id)
       end
 
       it 'has public workbook_by_title method' do
-        expect(session).to respond_to(:workbook_by_title)
+        expect(Instances.session).to respond_to(:workbook_by_title)
       end
 
       it 'using an id, it raises an error when a wookbook is not found' do
-        expect{session.workbook_by_id('16QOG3WKn_WPUt1EYLE5_VkTPU82yDvpMqrc7jr40jjs')}.to raise_error(
+        expect{Instances.session.workbook_by_id('16QOG3WKn_WPUt1EYLE5_VkTPU82yDvpMqrc7jr40jjs')}.to raise_error(
             JrGoogleData::ReadError, /ServiceException: Internal Server Error/
           )
       end
 
       it 'retrieves a workbook object using an id' do
-        workbook = session.workbook_by_id('16QOG3WKn_WPUt1EYLE5_VkTPU82yDvpMqrc7jr40iis')
+        workbook = Instances.session.workbook_by_id('16QOG3WKn_WPUt1EYLE5_VkTPU82yDvpMqrc7jr40iis')
         expect(workbook).not_to eq(nil)
       end
 
       it 'using a title, it raises an error when a wookbook is not found' do
-        expect{session.workbook_by_title('Test-colors')}.to raise_error(
+        expect{Instances.session.workbook_by_title('Test-colors')}.to raise_error(
             JrGoogleData::ReadError, /File not found with title/
           )
       end
 
       it 'retrieves a workbook object using a title' do
-        workbook = session.workbook_by_title('Test-colours')
+        workbook = Instances.session.workbook_by_title('Test-colours')
         expect(workbook).not_to eq(nil)
       end
     end

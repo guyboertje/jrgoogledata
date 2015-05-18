@@ -2,8 +2,6 @@ package com.jrgoogledata;
 
 import com.google.gdata.data.spreadsheet.CustomElementCollection;
 import com.google.gdata.data.spreadsheet.ListEntry;
-import com.google.gdata.util.ServiceException;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import org.jruby.Ruby;
@@ -26,6 +24,8 @@ import org.jruby.runtime.builtin.IRubyObject;
 public class JrRow extends RubyObject {
     ListEntry _row;
     CustomElementCollection _elements;
+    boolean _empty;
+    boolean _insertOnly;
     Set<String> _tags;
     Set<RubyString> _ruby_keys = new HashSet<>();
 
@@ -45,7 +45,22 @@ public class JrRow extends RubyObject {
                 runtime.getModule("JrGoogleData").getClass("Row"));
         _row = row;
         _elements = row.getCustomElements();
-        _tags = _elements.getTags();
+        _insertOnly = false;
+        setupTags(runtime, _elements.getTags());
+    }
+
+    public JrRow(final Ruby runtime, ListEntry row, Set<String> tags) {
+        super(runtime,
+                runtime.getModule("JrGoogleData").getClass("Row"));
+        _row = row;
+        _elements = row.getCustomElements();
+        _insertOnly = true;
+        setupTags(runtime, tags);
+    }
+
+    private void setupTags(Ruby runtime, Set<String> tags) {
+        _tags = tags;
+        _empty = _tags.isEmpty();
         for (String tag : _tags) {
             _ruby_keys.add(RubyString.newUnicodeString(runtime, tag));
         }
@@ -94,11 +109,14 @@ public class JrRow extends RubyObject {
 
     @JRubyMethod(required = 2)
     public IRubyObject modify(ThreadContext context, IRubyObject key, IRubyObject value) {
-        String k = key.toString();
-        if (_tags.contains(k)) {
-            _elements.setValueLocal(k, value.toString());
-        }
+        setLocal(key.toString(), value.toString());
         return context.nil;
+    }
+
+    private void setLocal(String key, String val) {
+        if (_tags.contains(key)) {
+            _elements.setValueLocal(key, val);
+        }
     }
 
     @JRubyMethod(required = 1)
@@ -109,22 +127,25 @@ public class JrRow extends RubyObject {
                     context, key,
                     RubyString.newEmptyString(context.runtime),
                     Block.NULL_BLOCK);
-            modify(context, key, val);
+            setLocal(key.toString(), val.toString());
         }
         return context.nil;
     }
 
     @JRubyMethod
     public JrRow update(ThreadContext context) {
+        if (_insertOnly) {
+            throw JrWriteError.newError(context.runtime, "This Row is insert only, it does not exist on the sheet yet");
+        }
         String errorMessage = "Failed to update Row, reason unknown";
         try {
             _row.update();
             return this;
         }
-        catch(IOException | ServiceException e) {
+        catch(Exception e) {
             errorMessage = e.getMessage();
         }
-        throw JrReadError.newError(context.runtime, errorMessage);
+        throw JrWriteError.newError(context.runtime, errorMessage);
     }
 
     public ListEntry getRow() {

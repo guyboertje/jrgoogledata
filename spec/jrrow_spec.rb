@@ -2,9 +2,8 @@ require 'spec_helper'
 
 module JrGoogleData
   describe Row do
-    let(:session)   { a_session() }
-    let(:worksheet) { a_workbook(session).worksheet_by_title('Main') }
-    let(:instance)  { worksheet.get_rows(qry).first }
+
+    setup_worksheet_instance()
 
     context 'its public api' do
       let(:instance) { described_class.new }
@@ -35,26 +34,55 @@ module JrGoogleData
     end
 
     context 'an instance' do
-      let(:qry) { worksheet.new_list_query.add_start_index(1).add_max_results(1) }
-      
+      let(:row)  do
+        qry = Instances.worksheet.new_list_query.with_start_index(1).with_max_results(1) 
+        Instances.worksheet.fetch_rows(qry).first
+      end
+
       it 'for a new instance, the inspect method shows bare contents' do
         expect(described_class.new.inspect).to match %r{#<JrGoogleData::Row:0x(\p{XDigit}+)>}
       end
 
       it 'for a found instance, the inspect method shows row contents' do
         regex = %r|.+Row:.+ title: .+, content: \{ (\w+: \w+\s\s){1,16}\} >|
-        expect(instance.inspect).to match regex
+        expect(row.inspect).to match regex
       end
 
       it 'a found instance, returns a Ruby Hash of row data' do
-        hash = instance.to_hash
+        hash = row.to_hash
         expect(hash).to be_a(Hash)
         expect(hash.keys).to eq(['id', 'name', 'age', 'colour', 'size'])
         expect(hash.values).to eq(['1', 'Foo', '23', 'red', 'L'])
       end
 
-      
+      it 'updates one cell of a Row' do
+        qry = Instances.worksheet.new_list_query.with_spreadsheet_query('id = 2').with_max_results(1)
+        row = Instances.worksheet.fetch_rows(qry).last
+        original = row.to_hash
+        previous_colour = original['colour']
+        new_colour = previous_colour == 'blue' ? 'black' : 'blue'
+        row.modify('colour', new_colour)
+        row.update
+        expected = original.merge('colour' => new_colour)
+        updated_row = Instances.worksheet.fetch_rows(qry).last.to_hash
+        expect(updated_row).to eq(expected)
+        expect(updated_row).not_to eq(original)
+      end
 
+      it 'updates all cells with a hash' do
+        qry = Instances.worksheet.new_list_query.with_spreadsheet_query('id = 2').with_max_results(1)
+        row = Instances.worksheet.fetch_rows(qry).last
+        original = row.to_hash
+        _name = original['name'] == 'Bar' ? 'Jazz' : 'Bar'
+        _age = original['age'] == '83' ? '38' : '83'
+        _colour = original['colour'] == 'blue' ? 'black' : 'blue'
+        _size = original['size'] == 'S' ? 'XL' : 'S'
+        _values = {'id'=>'2', 'name' => _name, 'age' => _age, 'colour' => _colour, 'size' => _size}
+        row.merge(_values)
+        row.update
+        updated_row = Instances.worksheet.fetch_rows(qry).last.to_hash
+        expect(updated_row).to eq(_values)
+      end
     end
   end
 end
